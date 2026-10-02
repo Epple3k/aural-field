@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Aural Field",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tiny generative ambient instrument that lives at the edge of your browser.",
   "permissions": ["sidePanel", "storage"],
   "side_panel": {
@@ -12,8 +12,5 @@
   },
   "background": {
     "service_worker": "background.js"
-  },
-  "icons": {
-    "128": "icons/icon128.png"
   }
 }

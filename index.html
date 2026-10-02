@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Aural Field</title>
 <meta name="theme-color" content="#eeeae1">
+<script>
+if(location.hash==="#panel" || location.protocol==="chrome-extension:"){
+  document.documentElement.classList.add("extension-panel");
+}
+</script>
 <style>
 :root{
   --paper:#eeeae1;
@@ -293,7 +298,7 @@ html.extension-panel body{
   overflow:hidden !important;
 }
 
-body.extension-panel .page{
+html.extension-panel body .page{
   position:relative;
   width:100%;
   height:100dvh !important;
@@ -305,27 +310,27 @@ body.extension-panel .page{
   overflow:hidden;
 }
 
-body.extension-panel .header{
+html.extension-panel body .header{
   min-height:24px;
 }
-body.extension-panel .header-readout,
-body.extension-panel .side-note,
-body.extension-panel .center-readout,
-body.extension-panel .macro-desc{
+html.extension-panel body .header-readout,
+html.extension-panel body .side-note,
+html.extension-panel body .center-readout,
+html.extension-panel body .macro-desc{
   display:none !important;
 }
-body.extension-panel .brand{
+html.extension-panel body .brand{
   font-size:9px;
   letter-spacing:.14em;
 }
-body.extension-panel .brand small{
+html.extension-panel body .brand small{
   display:block;
   margin-top:3px;
   font-size:5px;
   letter-spacing:.14em;
 }
 
-body.extension-panel .stage{
+html.extension-panel body .stage{
   position:relative;
   display:block !important;
   min-height:0 !important;
@@ -334,7 +339,7 @@ body.extension-panel .stage{
   cursor:crosshair;
   pointer-events:auto;
 }
-body.extension-panel .field-hint{
+html.extension-panel body .field-hint{
   display:block;
   position:absolute;
   left:0;
@@ -346,7 +351,7 @@ body.extension-panel .field-hint{
   opacity:.65;
   pointer-events:none;
 }
-body.extension-panel .material{
+html.extension-panel body .material{
   position:absolute !important;
   right:1px;
   top:1px;
@@ -357,62 +362,62 @@ body.extension-panel .material{
   z-index:4;
   transition:opacity .15s ease,transform .15s ease;
 }
-body.extension-panel .material:hover{
+html.extension-panel body .material:hover{
   opacity:.95;
   transform:scale(1.03);
 }
-body.extension-panel .mat-label{font-size:4px}
-body.extension-panel .mat-dot{
+html.extension-panel body .mat-label{font-size:4px}
+html.extension-panel body .mat-dot{
   width:14px;
   height:14px;
   box-shadow:none;
 }
-body.extension-panel .mat-dot:before{inset:4px}
+html.extension-panel body .mat-dot:before{inset:4px}
 
-body.extension-panel .footer{
+html.extension-panel body .footer{
   display:grid !important;
   grid-template-columns:1fr !important;
   gap:7px !important;
   align-items:end;
   min-height:0;
 }
-body.extension-panel .play-cluster{
+html.extension-panel body .play-cluster{
   width:100% !important;
   padding:0;
 }
-body.extension-panel .play-row{
+html.extension-panel body .play-row{
   gap:9px;
   align-items:center;
 }
-body.extension-panel .play{
+html.extension-panel body .play{
   width:44px;
   height:44px;
   flex:0 0 auto;
 }
-body.extension-panel .play svg{
+html.extension-panel body .play svg{
   width:15px;
   height:15px;
 }
-body.extension-panel .play-meta{
+html.extension-panel body .play-meta{
   min-width:72px;
 }
-body.extension-panel .play-meta .state{
+html.extension-panel body .play-meta .state{
   font-size:5px;
   margin-bottom:2px;
 }
-body.extension-panel .play-meta .chord{
+html.extension-panel body .play-meta .chord{
   font-size:11px;
 }
-body.extension-panel .hover-hint{
+html.extension-panel body .hover-hint{
   display:none;
 }
-body.extension-panel .volume-control{
+html.extension-panel body .volume-control{
   margin-left:auto;
   width:76px;
   gap:3px;
   font-size:4px;
 }
-body.extension-panel .context{
+html.extension-panel body .context{
   left:0;
   bottom:51px;
   width:min(220px,calc(100vw - 24px));
@@ -421,59 +426,81 @@ body.extension-panel .context{
   z-index:10;
 }
 
-body.extension-panel .macros{
+html.extension-panel body .macros{
   display:grid !important;
   grid-template-columns:1fr !important;
   gap:3px !important;
   opacity:.72;
 }
-body.extension-panel .macro{
+html.extension-panel body .macro{
   display:grid !important;
   grid-template-columns:48px minmax(0,1fr) 22px !important;
   grid-template-rows:16px !important;
   gap:5px !important;
   align-items:center;
 }
-body.extension-panel .macro-head{
+html.extension-panel body .macro-head{
   display:contents !important;
 }
-body.extension-panel .macro-head span:first-child{
+html.extension-panel body .macro-head span:first-child{
   grid-column:1;
   grid-row:1;
   font-size:6px;
   align-self:center;
 }
-body.extension-panel .macro-head span:last-child{
+html.extension-panel body .macro-head span:last-child{
   grid-column:3;
   grid-row:1;
   justify-self:end;
   font-size:6px;
   align-self:center;
 }
-body.extension-panel .track-row{
+html.extension-panel body .track-row{
   grid-column:2;
   grid-row:1;
   display:grid !important;
   grid-template-columns:1fr !important;
 }
-body.extension-panel .track-row i{
+html.extension-panel body .track-row i{
   display:none !important;
 }
-body.extension-panel input[type=range]{
+html.extension-panel body input[type=range]{
   height:16px;
 }
 
 /* The side panel is intentionally one fixed visual object.
    Wider side panels only give the central form more air. */
-body.extension-panel #formCanvas{
+html.extension-panel body #formCanvas{
   position:fixed;
   inset:0;
   z-index:0;
 }
 
+
+/* hard stop: the side panel is a single viewport-sized instrument */
+html.extension-panel,
+html.extension-panel body{
+  overflow:hidden !important;
+  overscroll-behavior:none;
+}
+html.extension-panel .page{
+  overflow:hidden !important;
+  max-height:100dvh !important;
+}
+html.extension-panel .stage{
+  overflow:visible !important;
+}
+html.extension-panel #formCanvas{
+  z-index:1 !important;
+}
+html.extension-panel .page{
+  z-index:2 !important;
+  background:transparent !important;
+}
+
 </style>
 </head>
-<body>
+<body class="">
 <canvas id="formCanvas"></canvas>
 
 <div class="page">
@@ -589,11 +616,8 @@ const contextName=$("#contextName"),state=$("#state"),chordEl=$("#chord");
 
 let W=0,H=0,dpr=1;
 const previewMode=new URLSearchParams(location.search).get("portfolioPreview")==="1";
-const extensionMode=location.protocol==="chrome-extension:";
-if(extensionMode){
-  document.documentElement.classList.add("extension-panel");
-  document.body.classList.add("extension-panel");
-}
+const extensionMode=document.documentElement.classList.contains("extension-panel");
+if(extensionMode) document.body.classList.add("extension-panel");
 let mx=.44,my=.35,drag=false;
 let seed=previewMode?7356:Math.floor(Math.random()*9999),rand=mulberry32(seed);
 let root=previewMode?2:0,modeIndex=0,chordIndex=0,progression=[0,3,4,1];
@@ -1000,9 +1024,9 @@ function draw(){
   }
 
   const cx=W*.50;
-  const cy=extensionMode ? H*.40 : H*.46;
+  const cy=extensionMode ? H*.37 : H*.46;
   const base=extensionMode
-    ? Math.min(W,H)*.43
+    ? Math.min(W,H)*.48
     : Math.min(W,H)*(W<670?.28:.31);
   const freq=formFrequency();
   const amp=formAmplitude();
@@ -1041,8 +1065,8 @@ function draw(){
     if(i===0)g.moveTo(x,y);else g.lineTo(x,y);
   }
   g.closePath();
-  g.strokeStyle="rgba(21,21,18,.92)";
-  g.lineWidth=1.15+energy*.8;
+  g.strokeStyle=extensionMode?"rgba(21,21,18,.96)":"rgba(21,21,18,.92)";
+  g.lineWidth=(extensionMode?1.55:1.15)+energy*.8;
   g.stroke();
 
   // internal frequency marks, very restrained

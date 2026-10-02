@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Aural Field 04</title>
+<title>Aural Field</title>
 <meta name="theme-color" content="#eeeae1">
 <style>
 :root{
@@ -277,6 +277,83 @@ input[type=range]::-moz-range-thumb{
   .footer{grid-template-columns:1fr;gap:14px}
   .macros{grid-template-columns:1fr}
 }
+
+.field-hint{display:none}
+.volume-control{
+  margin-left:auto;width:110px;display:grid;gap:5px;
+  font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)
+}
+.volume-control input{width:100%}
+
+/* Chrome side panel: the instrument becomes a little browser object, not a webpage. */
+body.extension-panel{overflow:hidden}
+body.extension-panel .page{
+  height:100dvh;min-height:0;padding:12px;gap:8px;
+  grid-template-rows:auto minmax(170px,1fr) auto;
+}
+body.extension-panel .header-readout,
+body.extension-panel .side-note,
+body.extension-panel .center-readout,
+body.extension-panel .macro-desc{display:none}
+body.extension-panel .brand{font-size:9px}
+body.extension-panel .brand small{font-size:6px;margin-top:4px}
+body.extension-panel .stage{
+  min-height:0;display:block;position:relative;
+  cursor:crosshair;pointer-events:auto;
+}
+body.extension-panel .field-hint{
+  display:block;position:absolute;left:0;bottom:6px;
+  font-size:6px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  opacity:.7;pointer-events:none
+}
+body.extension-panel .material{
+  position:absolute;right:0;top:0;width:74px;margin:0;
+  opacity:.52;transition:opacity .15s ease,transform .15s ease
+}
+body.extension-panel .material:hover{opacity:1;transform:scale(1.03)}
+body.extension-panel .mat-label{font-size:5px}
+body.extension-panel .mat-dot{width:16px;height:16px}
+body.extension-panel .mat-dot:before{inset:5px}
+body.extension-panel .footer{
+  grid-template-columns:1fr;gap:9px;align-items:end
+}
+body.extension-panel .play-cluster{width:100%;padding:0}
+body.extension-panel .play{width:48px;height:48px}
+body.extension-panel .play svg{width:16px;height:16px}
+body.extension-panel .play-meta .state{font-size:6px}
+body.extension-panel .play-meta .chord{font-size:13px}
+body.extension-panel .hover-hint{font-size:5px;margin-top:5px}
+body.extension-panel .context{
+  width:min(230px,calc(100vw - 24px));bottom:58px
+}
+body.extension-panel .volume-control{width:88px;font-size:5px}
+body.extension-panel .macros{
+  grid-template-columns:1fr;gap:5px
+}
+body.extension-panel .macro{
+  grid-template-columns:54px 1fr 24px;grid-template-rows:auto;gap:6px;align-items:center
+}
+body.extension-panel .macro-head{display:contents}
+body.extension-panel .macro-head span:first-child{
+  grid-column:1;font-size:7px
+}
+body.extension-panel .macro-head span:last-child{
+  grid-column:3;grid-row:1;justify-self:end;font-size:7px
+}
+body.extension-panel .track-row{
+  grid-column:2;grid-row:1;grid-template-columns:1fr
+}
+body.extension-panel .track-row i{display:none}
+body.extension-panel input[type=range]{height:18px}
+
+@media(min-width:440px){
+  body.extension-panel .macros{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  body.extension-panel .macro{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto;gap:3px}
+  body.extension-panel .macro-head{display:flex}
+  body.extension-panel .macro-head span:first-child,
+  body.extension-panel .macro-head span:last-child{grid-column:auto;grid-row:auto}
+  body.extension-panel .track-row{grid-column:auto;grid-row:auto}
+}
 </style>
 </head>
 <body>
@@ -286,7 +363,7 @@ input[type=range]::-moz-range-thumb{
   <header class="header">
     <div class="brand">
       <b>Aural Field</b>
-      <small>generative ambient study / 04</small>
+      <small>generative ambient instrument</small>
     </div>
     <div class="header-readout">
       <div>function<strong id="fnReadout">Lydian / bloom</strong></div>
@@ -300,6 +377,8 @@ input[type=range]::-moz-range-thumb{
       <b>One object, three forces.</b><br>
       The controls below alter the same mathematical form that drives timing, register, modulation, and orchestration.
     </div>
+
+    <div class="field-hint">click field to drop a note</div>
 
     <div class="center-readout">
       <span>f<b id="freqReadout">6.8</b></span>
@@ -337,6 +416,10 @@ input[type=range]::-moz-range-thumb{
           <div class="chord" id="chord">C / lydian</div>
           <div class="hover-hint">hover play for harmonic context</div>
         </div>
+        <label class="volume-control">
+          <span>volume</span>
+          <input id="volume" type="range" min="0" max="100" value="72" aria-label="Volume">
+        </label>
       </div>
     </div>
 
@@ -382,12 +465,15 @@ const playBtn=$("#play"), regen=$("#regen"), modeGrid=$("#modeGrid");
 const density=$("#density"), space=$("#space"), motion=$("#motion");
 const densityValue=$("#densityValue"),spaceValue=$("#spaceValue"),motionValue=$("#motionValue");
 const material=$("#material"),matDot=$("#matDot");
+const volume=$("#volume"),stageEl=document.querySelector(".stage");
 const fnReadout=$("#fnReadout"),rootReadout=$("#rootReadout"),seedReadout=$("#seedReadout");
 const freqReadout=$("#freqReadout"),ampReadout=$("#ampReadout"),phaseReadout=$("#phaseReadout");
 const contextName=$("#contextName"),state=$("#state"),chordEl=$("#chord");
 
 let W=0,H=0,dpr=1;
 const previewMode=new URLSearchParams(location.search).get("portfolioPreview")==="1";
+const extensionMode=location.protocol==="chrome-extension:";
+if(extensionMode) document.body.classList.add("extension-panel");
 let mx=.44,my=.35,drag=false;
 let seed=previewMode?7356:Math.floor(Math.random()*9999),rand=mulberry32(seed);
 let root=previewMode?2:0,modeIndex=0,chordIndex=0,progression=[0,3,4,1];
@@ -421,6 +507,38 @@ function formFrequency(){return 2.2 + D()*12.8}
 function formAmplitude(){return .055 + S()*.34}
 function phaseSpeed(){return .05 + M()*1.55}
 
+function saveState(){
+  try{
+    localStorage.setItem("auralFieldState",JSON.stringify({
+      density:Number(density.value),
+      space:Number(space.value),
+      motion:Number(motion.value),
+      volume:Number(volume.value),
+      mx,my,seed,root,modeIndex,
+      progression:[...progression]
+    }));
+  }catch(_){}
+}
+function restoreState(){
+  try{
+    const raw=localStorage.getItem("auralFieldState");
+    if(!raw)return false;
+    const s=JSON.parse(raw);
+    density.value=clamp(Number(s.density??42),0,100);
+    space.value=clamp(Number(s.space??64),0,100);
+    motion.value=clamp(Number(s.motion??34),0,100);
+    volume.value=clamp(Number(s.volume??72),0,100);
+    mx=clamp(Number(s.mx??.44));
+    my=clamp(Number(s.my??.35));
+    seed=Number.isFinite(Number(s.seed))?Number(s.seed):seed;
+    root=Number.isFinite(Number(s.root))?Number(s.root):root;
+    modeIndex=clamp(Number(s.modeIndex??0),0,MODES.length-1);
+    progression=Array.isArray(s.progression)&&s.progression.length?s.progression:progression;
+    rand=mulberry32(seed);
+    return true;
+  }catch(_){return false}
+}
+
 function chord(){
   const s=mode().scale;
   const degree=progression[chordIndex%progression.length];
@@ -441,12 +559,14 @@ function syncUI(){
   freqReadout.textContent=formFrequency().toFixed(1);
   ampReadout.textContent=formAmplitude().toFixed(2);
   phaseReadout.textContent=phaseSpeed().toFixed(2);
+  matDot.style.left=(mx*100)+"%";
+  matDot.style.top=(my*100)+"%";
 }
 function newWorld(){
   seed=Math.floor(Math.random()*9999);rand=mulberry32(seed);
   root=pick(ROOTS);
   progression=pick([[0,3,4,1],[0,4,5,3],[0,2,5,4],[0,5,3,4],[0,1,3,5],[0,4,2,1]]);
-  chordIndex=0;syncUI();
+  chordIndex=0;syncUI();saveState();
 }
 function pathForIcon(idx){
   const pts=[];
@@ -470,7 +590,7 @@ function renderModes(){
       <em>${m.short}</em>
     </button>`).join("");
   modeGrid.querySelectorAll(".mode-btn").forEach(b=>b.addEventListener("click",()=>{
-    modeIndex=Number(b.dataset.i);chordIndex=0;renderModes();syncUI();
+    modeIndex=Number(b.dataset.i);chordIndex=0;renderModes();syncUI();saveState();
     if(playing&&audio){nextChord=audio.currentTime+.05;swellChord(audio.currentTime+.03)}
   }));
 }
@@ -521,7 +641,7 @@ function lfoParam(target,t,duration,depth,rate){
 async function initAudio(){
   if(audio)return;
   audio=new (window.AudioContext||window.webkitAudioContext)();
-  master=audio.createGain();master.gain.value=.54;
+  master=audio.createGain();master.gain.value=.54*(Number(volume.value)/100);
 
   compressor=audio.createDynamicsCompressor();
   compressor.threshold.value=-19;compressor.knee.value=18;compressor.ratio.value=2.3;compressor.attack.value=.04;compressor.release.value=.5;
@@ -553,7 +673,7 @@ function updateAudioMacros(){
   dry.gain.setTargetAtTime(.98-s*.38,audio.currentTime,.08);
   delay.delayTime.setTargetAtTime(.09+s*.72,audio.currentTime,.08);
   feedback.gain.setTargetAtTime(.04+s*.38,audio.currentTime,.08);
-  master.gain.setTargetAtTime(.46+d*.12,audio.currentTime,.08);
+  master.gain.setTargetAtTime((.46+d*.12)*(Number(volume.value)/100),audio.currentTime,.08);
 }
 function harmonicVoice(n,t,amp=1){
   const osc=audio.createOscillator(),f=audio.createBiquadFilter(),gg=audio.createGain(),p=panNode(1);
@@ -623,6 +743,29 @@ function orchestrate(n,t){
   if(rand()<.06+m*.48+d*.18) pulseVoice(n,t+.01,.55+m*.35);
   if(d>.72 && rand()<.3) harmonicVoice(n+12,t+.08,.42);
 }
+async function playFieldGesture(e){
+  if(e.target.closest(".material,.play-cluster,.macros,button,input"))return;
+  await initAudio();
+  if(audio.state==="suspended")await audio.resume();
+
+  const r=stageEl.getBoundingClientRect();
+  const x=clamp((e.clientX-r.left)/r.width);
+  const y=clamp((e.clientY-r.top)/r.height);
+  const s=mode().scale;
+  const degree=Math.min(s.length-1,Math.floor(x*s.length));
+  let n=48+root+s[degree];
+  if(y<.58)n+=12;
+  if(y<.18)n+=12;
+
+  const t=audio.currentTime+.01;
+  if(y<.32)glassVoice(n,t,.9);
+  else if(y>.74)subVoice(n,t,.75);
+  else harmonicVoice(n,t,.9);
+
+  if(my>.52&&rand()<.7)dustVoice(n,t+.02,.45);
+  bursts.push({a:x*TAU,life:1,speed:.1,intensity:.9,type:"gesture"});
+}
+
 function swellChord(t){
   const c=chord(),d=D(),s=S();
   const voices=2+Math.round(d*4);
@@ -818,6 +961,7 @@ function setMaterial(e){
   my=clamp((e.clientY-r.top)/r.height);
   matDot.style.left=mx*100+"%";
   matDot.style.top=my*100+"%";
+  saveState();
 }
 material.addEventListener("pointerdown",e=>{
   drag=true;material.setPointerCapture(e.pointerId);setMaterial(e);
@@ -830,7 +974,10 @@ material.addEventListener("pointerup",e=>{drag=false;material.releasePointerCapt
   spaceValue.textContent=space.value;
   motionValue.textContent=motion.value;
   updateAudioMacros();
+  saveState();
 }));
+volume.addEventListener("input",()=>{updateAudioMacros();saveState()});
+stageEl.addEventListener("pointerdown",playFieldGesture);
 
 playBtn.addEventListener("click",toggle);
 regen.addEventListener("click",()=>{
@@ -838,8 +985,15 @@ regen.addEventListener("click",()=>{
   if(playing&&audio){nextChord=audio.currentTime+.04;swellChord(audio.currentTime+.03)}
 });
 
+addEventListener("keydown",e=>{
+  if(e.target.matches("input,button"))return;
+  if(e.code==="Space"){e.preventDefault();toggle()}
+  if(e.key.toLowerCase()==="r"){e.preventDefault();newWorld();bursts=[];particles=[]}
+});
+
+const restored=restoreState();
 renderModes();
-if(previewMode){syncUI()}else{newWorld()}
+if(restored){syncUI()}else if(previewMode){syncUI()}else{newWorld()}
 densityValue.textContent=density.value;
 spaceValue.textContent=space.value;
 motionValue.textContent=motion.value;

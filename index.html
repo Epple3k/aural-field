@@ -387,9 +387,10 @@ const freqReadout=$("#freqReadout"),ampReadout=$("#ampReadout"),phaseReadout=$("
 const contextName=$("#contextName"),state=$("#state"),chordEl=$("#chord");
 
 let W=0,H=0,dpr=1;
+const previewMode=new URLSearchParams(location.search).get("portfolioPreview")==="1";
 let mx=.44,my=.35,drag=false;
-let seed=Math.floor(Math.random()*9999),rand=mulberry32(seed);
-let root=0,modeIndex=0,chordIndex=0,progression=[0,3,4,1];
+let seed=previewMode?7356:Math.floor(Math.random()*9999),rand=mulberry32(seed);
+let root=previewMode?2:0,modeIndex=0,chordIndex=0,progression=[0,3,4,1];
 
 let audio=null,master=null,dry=null,wet=null,delay=null,feedback=null,analyser=null,compressor=null;
 let playing=false,scheduler=null,nextEvent=0,nextChord=0;
@@ -838,7 +839,7 @@ regen.addEventListener("click",()=>{
 });
 
 renderModes();
-newWorld();
+if(previewMode){syncUI()}else{newWorld()}
 densityValue.textContent=density.value;
 spaceValue.textContent=space.value;
 motionValue.textContent=motion.value;

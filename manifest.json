@@ -1,11 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Aural Field",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A tiny generative ambient instrument that lives at the edge of your browser.",
-  "permissions": ["sidePanel", "storage"],
+  "permissions": [
+    "sidePanel",
+    "storage"
+  ],
   "side_panel": {
-    "default_path": "index.html"
+    "default_path": "index.html#panel"
   },
   "action": {
     "default_title": "Open Aural Field"

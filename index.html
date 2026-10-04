@@ -615,7 +615,7 @@ const freqReadout=$("#freqReadout"),ampReadout=$("#ampReadout"),phaseReadout=$("
 const contextName=$("#contextName"),state=$("#state"),chordEl=$("#chord");
 
 let W=0,H=0,dpr=1;
-const previewMode=new URLSearchParams(location.search).get("portfolioPreview")==="1";
+const previewMode=new URLSearchParams(location.search).get("portfolioPreview")==="1";\nconst staticPreviewMode=new URLSearchParams(location.search).get("portfolioStatic")==="1";
 const extensionMode=document.documentElement.classList.contains("extension-panel");
 if(extensionMode) document.body.classList.add("extension-panel");
 let mx=.44,my=.35,drag=false;
@@ -1004,7 +1004,7 @@ function resize(){
 addEventListener("resize",resize);resize();
 
 function draw(){
-  requestAnimationFrame(draw);
+  if(!staticPreviewMode) requestAnimationFrame(draw);
   const t=performance.now()/1000;
   let e=0;
   if(analyser&&playing){
